@@ -1,5 +1,0 @@
-timestamp,event_name,event_season,config_id,device_id,device_name,match,team,scout_name,alliance_color,auto_score,teleop_score,endgame,notes
-2025-12-10T17:48:16,Example Robotics Event,2024-2025,example_robotics_event_2024-2025,d52a935aab24,,1919,1829,rishan,Blue,190,80,Failed,good team
-2025-12-10T17:59:39,Example Robotics Event,2024-2025,example_robotics_event_2024-2025,8040214c355f,,12,12,12,Blue,12,12,Partial,12
-2025-12-10T18:01:01,Example Robotics Event,2024-2025,example_robotics_event_2024-2025,389cae64ebd5,,12,12,12,Blue,12,12,Failed,12
-2025-12-10T18:03:02,Example Robotics Event,2024-2025,example_robotics_event_2024-2025,SCOUT-001,Main Scout Tablet,12,12,12,Blue,12,12,Partial,12
