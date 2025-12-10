@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <title>{% block title %}Offline Scouting Manager{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{ url_for('static', filename='favicon.ico') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='dist/output.css') }}"
+    />
+    <script src="{{ url_for('static', filename='node_modules/flowbite/dist/flowbite.min.js') }}"></script>
+    {% block extra_head %}{% endblock %}
+  </head>
+  <body class="bg-gray-900 text-gray-100 min-h-screen">
+    {% include 'components/navbar.html' %} {% block content %}{% endblock %} {%
+    block extra_scripts %}{% endblock %}
+  </body>
+</html>

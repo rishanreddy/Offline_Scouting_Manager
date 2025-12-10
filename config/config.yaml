@@ -1,0 +1,50 @@
+device:
+  name: "Main Scout Tablet"
+  uniqueId: "SCOUT-001"
+
+event:
+  name: "Example Robotics Event"
+  season: "2024-2025"
+
+fields:
+  - name: match
+    label: "Match #"
+    type: integer
+    required: true
+
+  - name: team
+    label: "Team ID"
+    type: integer
+    required: true
+
+  - name: scout_name
+    label: "Scout name"
+    type: text
+    required: true
+
+  - name: alliance_color
+    label: "Alliance"
+    type: select
+    options: ["Red", "Blue"]
+    required: true
+
+  - name: auto_score
+    label: "Auto score"
+    type: integer
+    required: true
+
+  - name: teleop_score
+    label: "Tele-op score"
+    type: integer
+    required: true
+
+  - name: endgame
+    label: "Endgame status"
+    type: select
+    options: ["Failed", "Partial", "Complete"]
+    required: true
+
+  - name: notes
+    label: "Notes"
+    type: textarea
+    required: false
