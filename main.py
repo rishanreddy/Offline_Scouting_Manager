@@ -147,4 +147,16 @@ def reset_data():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    import sys
+
+    # Check for --production flag
+    production_mode = "--production" in sys.argv
+    if production_mode:
+        from waitress import serve
+
+        print("Starting in production mode (Waitress)...")
+        print("Serving on http://localhost:8080")
+        serve(app, host="0.0.0.0", port=8080)
+    else:
+        print("Starting in development mode (Flask)...")
+        app.run(debug=True, host="127.0.0.1", port=5000)

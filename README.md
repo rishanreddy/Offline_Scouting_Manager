@@ -11,6 +11,10 @@ A Flask web app for robotics competition scouting that works completely offline.
 
 ## Setup
 
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/) first:
+
+Then:
+
 ```bash
 # Install dependencies
 uv sync
@@ -19,7 +23,7 @@ uv sync
 uv run main.py
 ```
 
-**Alternative**: Run `install.bat` (Windows) to automatically install dependencies and start the app.
+**Alternative**: Run `setup-run.bat` (Windows) to automatically install dependencies and start the app.
 
 Open `http://127.0.0.1:5000` in your browser.
 

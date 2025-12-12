@@ -1,27 +1,21 @@
 @echo off
-echo Installing Offline Scouting Manager...
+echo Setting up Offline Scouting Manager...
 echo.
 
-REM Check if uv is already installed
+REM Check if uv is installed
 uv --version >nul 2>&1
-if %errorlevel% equ 0 (
-    echo uv is already installed.
-    goto :run_app
-)
-
-echo Installing uv...
-REM Download and install uv
-powershell -Command "irm https://astral.sh/uv/install.ps1 | iex"
 if %errorlevel% neq 0 (
-    echo Failed to install uv. Please check your internet connection.
+    echo ERROR: uv is not installed!
+    echo.
+    echo Please install uv first by visiting:
+    echo https://docs.astral.sh/uv/getting-started/installation/
+    echo.
+    echo After installing uv, rerun this script to set up the application.
     pause
     exit /b 1
 )
 
-REM Add uv to PATH for current session
-set PATH=%USERPROFILE%\.cargo\bin;%PATH%
-
-:run_app
+echo uv is installed. Proceeding with setup...
 echo.
 echo Setting up Python environment and dependencies...
 cd /d "%~dp0.."
@@ -35,7 +29,7 @@ if not exist "main.py" (
 )
 
 echo Running from directory: %CD%
-uv run main.py
+uv run main.py --production
 
 if %errorlevel% neq 0 (
     echo Failed to run the application.
