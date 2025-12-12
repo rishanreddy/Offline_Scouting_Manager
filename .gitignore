@@ -6,3 +6,6 @@ wheels/
 
 # Virtual environments
 .venv
+
+device.json
+scouting_data.csv
