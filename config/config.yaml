@@ -13,7 +13,7 @@ fields:
     required: true
     graph: none
 
-# DO NOT CHANGE
+  # DO NOT CHANGE
   - name: team
     label: "Team ID"
     type: integer
@@ -33,14 +33,14 @@ fields:
     required: true
     graph: none
 
-# DO NOT CHANGE
+  # DO NOT CHANGE
   - name: auto_score
     label: "Auto score"
     type: integer
     required: true
     graph: line
 
-# DO NOT CHANGE
+  # DO NOT CHANGE
   - name: teleop_score
     label: "Tele-op score"
     type: integer
