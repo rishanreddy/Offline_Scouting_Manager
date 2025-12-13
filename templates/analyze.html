@@ -282,6 +282,39 @@ Scouting Manager{% endblock %} {% block extra_head %}
       </div>
     </div>
 
+    <!-- Team Averages Table -->
+    {% if team_averages %}
+    <div class="mb-6 p-6 bg-gray-800 border border-gray-700 rounded-lg shadow">
+      <h5 class="text-lg font-semibold text-white mb-4">Team Average Scores</h5>
+      <div class="relative overflow-x-auto">
+        <table id="teamAveragesTable" class="table display stripe hover w-full">
+          <thead>
+            <tr>
+              <th>Team</th>
+              <th>Entries</th>
+              <th>Average Score</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for team_avg in team_averages %}
+            <tr>
+              <td>{{ team_avg.team }}</td>
+              <td>{{ team_avg.entry_count }}</td>
+              <td data-order="{{ team_avg.avg_score }}">{{ team_avg.avg_score }}</td>
+              <td>
+                <a href="{{ url_for('team_info', team=team_avg.team) }}" class="text-blue-400 hover:text-blue-300 font-medium underline">
+                  View Details
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
     <!-- Filters -->
     <div class="mb-6 p-6 bg-gray-800 border border-gray-700 rounded-lg shadow">
       <h5 class="text-base font-semibold text-white mb-4">Column Filters</h5>
@@ -517,6 +550,32 @@ Scouting Manager{% endblock %} {% block extra_head %}
         },
       },
     });
+
+    // Initialize DataTable for Team Averages if present
+    const teamTableEl = document.getElementById("teamAveragesTable");
+    if (teamTableEl) {
+      $("#teamAveragesTable").DataTable({
+        paging: true,
+        pageLength: 25,
+        lengthChange: true,
+        ordering: true,
+        order: [[2, "desc"]], // sort by Average Score column (index 2)
+        info: true,
+        searching: true,
+        columnDefs: [
+          { targets: 0, className: 'dt-body-left' },
+          { targets: 1, className: 'dt-body-left' },
+          { targets: 2, className: 'dt-body-left' },
+          { targets: 3, orderable: false, searchable: false, className: 'dt-body-left' },
+        ],
+        language: {
+          search: "Search:",
+          lengthMenu: "Show _MENU_",
+          info: "Showing _START_ to _END_ of _TOTAL_",
+          zeroRecords: "No matches found",
+        },
+      });
+    }
 
     calculateStats();
 
