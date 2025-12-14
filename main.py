@@ -367,7 +367,7 @@ if __name__ == "__main__":
         from waitress import serve
 
         print("Starting in production mode (Waitress)...")
-        print("Serving on http://localhost:8080")
+        print("Serving on http://127.0.0.1:8080")
         serve(app, host="0.0.0.0", port=8080)
     else:
         app.run(debug=True, host="127.0.0.1", port=5000)
