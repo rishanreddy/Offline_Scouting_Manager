@@ -1,12 +1,6 @@
 {% extends "base.html" %} {% set current_page = 'analysis' %} {% import
 'components/alert.html' as alert %} {% block title %}Data Analysis - Offline
 Scouting Manager{% endblock %} {% block extra_head %}
-<!-- DataTables CSS -->
-<link
-  rel="stylesheet"
-  href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css"
-/>
-
 <style>
   /* DataTables dark theme overrides */
   table.dataTable {
@@ -90,6 +84,19 @@ Scouting Manager{% endblock %} {% block extra_head %}
   .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
     color: #fff !important;
     background-color: #2563eb !important;
+  }
+
+  /* Team links styling */
+  tbody td a {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  tbody td a:hover {
+    color: #60a5fa;
+    text-decoration: underline;
   }
 
   @keyframes spin {
@@ -221,23 +228,62 @@ Scouting Manager{% endblock %} {% block extra_head %}
       {% if error %} {{ alert.error(error) }} {% endif %} {% if
       uploaded_filenames %}
       <div
-        class="mt-4 p-4 text-sm text-green-800 border border-green-300 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 dark:border-green-800"
+        class="mt-4 p-4 border border-green-300 rounded-lg bg-green-50 dark:bg-gray-800 dark:border-green-700"
       >
-        <p class="font-medium mb-2">
-          Loaded {{ uploaded_filenames|length }} file(s):
-        </p>
-        <div class="space-y-1">
+        <div class="flex items-center justify-between mb-3">
+          <h3
+            class="text-sm font-semibold text-green-800 dark:text-green-400 flex items-center gap-2"
+          >
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            Loaded Files ({{ uploaded_filenames|length }})
+          </h3>
+          <form method="POST" action="/clear_session" class="inline">
+            <button
+              type="submit"
+              class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-md transition-colors duration-200 flex items-center gap-1.5"
+              onclick="return confirm('Clear all loaded files from session?');"
+            >
+              <svg
+                class="w-3.5 h-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+              Clear All
+            </button>
+          </form>
+        </div>
+        <ul class="space-y-1.5">
           {% for name in uploaded_filenames %}
-          <div class="flex items-center gap-2 text-sm">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <li
+            class="flex items-center gap-2 text-sm text-green-800 dark:text-green-400"
+          >
+            <svg
+              class="w-4 h-4 flex-shrink-0"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
               <path
                 d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
               ></path>
             </svg>
-            <span>{{ name }}</span>
-          </div>
+            <span class="truncate">{{ name }}</span>
+          </li>
           {% endfor %}
-        </div>
+        </ul>
       </div>
       {% endif %}
     </div>
@@ -256,8 +302,8 @@ Scouting Manager{% endblock %} {% block extra_head %}
       <div
         class="p-6 bg-gray-800 border border-gray-700 rounded-lg text-center"
       >
-        <dt id="uniqueTeams" class="mb-2 text-3xl font-extrabold text-blue-500">
-          —
+        <dt class="mb-2 text-3xl font-extrabold text-blue-500">
+          {{ teams_summary|length }}
         </dt>
         <dd class="text-gray-400 text-sm">Unique Teams</dd>
       </div>
@@ -282,91 +328,183 @@ Scouting Manager{% endblock %} {% block extra_head %}
       </div>
     </div>
 
-    <!-- Filters -->
-    <div class="mb-6 p-6 bg-gray-800 border border-gray-700 rounded-lg shadow">
-      <h5 class="text-base font-semibold text-white mb-4">Column Filters</h5>
+    <!-- Tab Navigation -->
+    <div class="mb-6 border-b border-gray-700">
+      <ul
+        class="flex flex-wrap -mb-px text-sm font-medium text-center"
+        role="tablist"
+      >
+        <li class="mr-2" role="presentation">
+          <button
+            class="inline-flex items-center justify-center p-4 border-b-2 border-blue-600 rounded-t-lg text-blue-500 hover:text-blue-400 group"
+            id="teams-tab"
+            data-tabs-target="#teams-content"
+            type="button"
+            role="tab"
+            aria-controls="teams-content"
+            aria-selected="true"
+          >
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"
+              ></path>
+            </svg>
+            Teams Overview
+          </button>
+        </li>
+        <li class="mr-2" role="presentation">
+          <button
+            class="inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg text-gray-400 hover:text-gray-300 hover:border-gray-500 group"
+            id="raw-data-tab"
+            data-tabs-target="#raw-data-content"
+            type="button"
+            role="tab"
+            aria-controls="raw-data-content"
+            aria-selected="false"
+          >
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+              <path
+                fill-rule="evenodd"
+                d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
+            Raw Data
+            <span
+              class="ml-2 inline-flex items-center justify-center bg-gray-700 text-gray-300 text-xs font-medium min-w-[2rem] px-2 py-0.5 rounded-full"
+            >
+              {{ table_rows|length }}
+            </span>
+          </button>
+        </li>
+      </ul>
+    </div>
 
-      <div id="filterContainer" class="space-y-3 mb-4">
-        <!-- Dynamic filters will be added here -->
+    <!-- Tab Content -->
+    <div id="tab-content">
+      <!-- Teams Tab -->
+      <div id="teams-content" role="tabpanel" aria-labelledby="teams-tab">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {% for team in teams_summary %}
+          <a
+            href="{{ url_for('team_info', team_number=team.team_number) }}"
+            class="block p-6 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-750 hover:border-blue-500 transition-all"
+          >
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-2xl font-bold text-white">
+                Team {{ team.team_number }}
+              </h3>
+              <svg
+                class="w-5 h-5 text-blue-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"
+                ></path>
+              </svg>
+            </div>
+            <div class="space-y-2">
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-400">Matches:</span>
+                <span class="text-white font-medium"
+                  >{{ team.total_matches }}</span
+                >
+              </div>
+              {% for field_name, field_stats in team.stats.items() %}
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-400"
+                  >{{ field_name.replace('_', ' ').title() }} Avg:</span
+                >
+                <span class="text-white font-medium"
+                  >{{ field_stats.average }}</span
+                >
+              </div>
+              {% endfor %}
+            </div>
+          </a>
+          {% endfor %}
+        </div>
       </div>
 
-      <div class="flex gap-3">
-        <button
-          onclick="addFilter()"
-          class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5"
+      <!-- Raw Data Tab -->
+      <div
+        id="raw-data-content"
+        class="hidden"
+        role="tabpanel"
+        aria-labelledby="raw-data-tab"
+      >
+        <!-- Filters -->
+        <div class="mb-4 p-4 bg-gray-800 border border-gray-700 rounded-lg">
+          <h5 class="text-sm font-semibold text-white mb-3">Filter Data</h5>
+          <div id="filterContainer" class="space-y-3 mb-3">
+            <!-- Dynamic filters will be added here -->
+          </div>
+          <div class="flex gap-2">
+            <button
+              onclick="addFilter()"
+              class="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-xs px-4 py-2"
+            >
+              <svg
+                class="w-3 h-3 inline-block mr-1"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                  clip-rule="evenodd"
+                ></path>
+              </svg>
+              Add Filter
+            </button>
+            <button
+              onclick="applyFilters()"
+              class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-xs px-4 py-2"
+            >
+              Apply
+            </button>
+            <button
+              onclick="clearFilters()"
+              class="text-white bg-gray-700 hover:bg-gray-800 font-medium rounded-lg text-xs px-4 py-2"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+
+        <!-- Data Table -->
+        <div
+          class="relative overflow-x-auto bg-gray-800 border border-gray-700 rounded-lg p-4"
         >
-          <svg
-            class="w-4 h-4 inline-block mr-1"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-              clip-rule="evenodd"
-            ></path>
-          </svg>
-          Add Filter
-        </button>
-        <button
-          onclick="applyFilters()"
-          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5"
-        >
-          Apply Filters
-        </button>
-        <button
-          onclick="clearFilters()"
-          class="text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5"
-        >
-          Clear All
-        </button>
+          <table id="combinedTable" class="table display stripe hover w-full">
+            <thead>
+              <tr>
+                {% for col in table_columns %}
+                <th>{{ col.label }}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in table_rows %}
+              <tr>
+                {% for col in table_columns %}
+                <td>{{ row.get(col.id, "") }}</td>
+                {% endfor %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
-    {% endif %}
-
-    <!-- Data Table -->
-    <div class="p-6 bg-gray-800 border border-gray-700 rounded-lg shadow">
-      <div class="flex justify-between items-start mb-4">
-        <div>
-          <h5 class="text-lg font-semibold text-white mb-2">Scouting Data</h5>
-          <p class="text-sm text-gray-400">
-            Search and sort data using the table controls below.
-          </p>
-        </div>
-        {% if table_rows %}
-        <span
-          class="inline-flex items-center bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-300"
-        >
-          <span
-            class="w-2 h-2 me-1 bg-blue-500 rounded-full animate-pulse"
-          ></span>
-          {{ table_rows|length }} entries
-        </span>
-        {% endif %}
-      </div>
-
-      {% if table_rows %}
-      <div class="relative overflow-x-auto">
-        <table id="combinedTable" class="table display stripe hover w-full">
-          <thead>
-            <tr>
-              {% for col in table_columns %}
-              <th>{{ col.label }}</th>
-              {% endfor %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in table_rows %}
-            <tr>
-              {% for col in table_columns %}
-              <td>{{ row.get(col.id, "") }}</td>
-              {% endfor %}
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      {% else %}
+    {% else %}
+    <div class="p-6 bg-gray-800 border border-gray-700 rounded-lg">
       <div class="flex flex-col items-center justify-center py-16">
         <svg
           class="w-16 h-16 text-gray-400 mb-4"
@@ -382,16 +520,42 @@ Scouting Manager{% endblock %} {% block extra_head %}
           Select CSV files above to view your scouting data.
         </p>
       </div>
-      {% endif %}
     </div>
+    {% endif %}
   </div>
 </section>
 {% endblock %} {% block extra_scripts %}
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-
 <script>
   document.addEventListener("DOMContentLoaded", function () {
+    // Tab functionality
+    const tabButtons = document.querySelectorAll('[role="tab"]');
+    const tabContents = document.querySelectorAll('[role="tabpanel"]');
+
+    tabButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const targetId = button.getAttribute("data-tabs-target");
+        const target = document.querySelector(targetId);
+
+        // Hide all tab contents
+        tabContents.forEach((content) => {
+          content.classList.add("hidden");
+        });
+
+        // Remove active state from all tabs
+        tabButtons.forEach((btn) => {
+          btn.classList.remove("border-blue-600", "text-blue-500");
+          btn.classList.add("border-transparent", "text-gray-400");
+          btn.setAttribute("aria-selected", "false");
+        });
+
+        // Show target content and activate button
+        target.classList.remove("hidden");
+        button.classList.remove("border-transparent", "text-gray-400");
+        button.classList.add("border-blue-600", "text-blue-500");
+        button.setAttribute("aria-selected", "true");
+      });
+    });
+
     const dropZone = document.getElementById("dropZone");
     const fileInput = document.getElementById("fileInput");
     const fileList = document.getElementById("fileList");
@@ -489,6 +653,16 @@ Scouting Manager{% endblock %} {% block extra_head %}
     const tableEl = document.getElementById("combinedTable");
     if (!tableEl) return;
 
+    // Find team column index
+    let teamColumnIndex = -1;
+    $("#combinedTable thead th").each(function (index) {
+      const headerText = $(this).text().toLowerCase();
+      if (headerText.includes("team")) {
+        teamColumnIndex = index;
+        return false;
+      }
+    });
+
     const dataTable = $("#combinedTable").DataTable({
       paging: true,
       pageLength: 50,
@@ -502,6 +676,26 @@ Scouting Manager{% endblock %} {% block extra_head %}
       info: true,
       searching: true,
       scrollX: true,
+      columnDefs:
+        teamColumnIndex >= 0
+          ? [
+              {
+                targets: teamColumnIndex,
+                render: function (data, type, row) {
+                  if (type === "display" && data) {
+                    return (
+                      '<a href="/team/' +
+                      data +
+                      '" class="text-blue-500 hover:text-blue-400 hover:underline">' +
+                      data +
+                      "</a>"
+                    );
+                  }
+                  return data;
+                },
+              },
+            ]
+          : [],
       language: {
         search: "Search:",
         lengthMenu: "Show _MENU_",

@@ -1,0 +1,156 @@
+"""CSV file operations for scouting data."""
+
+import csv
+import datetime
+
+from .constants import CSV_FILE
+from .config import get_device, get_event_ids
+from .formatting import format_timestamp
+
+
+def get_csv_header(fields):
+    """Generate CSV header columns from field definitions.
+
+    Args:
+        fields: List of field definition dicts
+
+    Returns:
+        List of column names including base columns and field columns
+
+    Base columns include metadata (timestamp, event info, device info).
+    Field columns are derived from the field names in config.
+    """
+    base_cols = [
+        "timestamp",
+        "event_name",
+        "event_season",
+        "config_id",
+        "device_id",
+        "device_name",
+    ]
+    field_cols = [f["name"] for f in fields]
+    return base_cols + field_cols
+
+
+def ensure_csv_header(fields):
+    """Create CSV file with header if it doesn't exist.
+
+    Args:
+        fields: List of field definition dicts
+    """
+    if CSV_FILE.exists():
+        return
+
+    header = get_csv_header(fields)
+    with CSV_FILE.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(header)
+
+
+def cast_value(field, raw_value: str) -> str:
+    """Convert raw form input to appropriate type for CSV storage.
+
+    Args:
+        field: Field definition dict with 'type' key
+        raw_value: Raw string value from form input
+
+    Returns:
+        Converted value as string for CSV storage
+
+    Supports field types: integer, text, select, textarea
+    If conversion fails, returns the original string.
+    """
+    if raw_value is None:
+        return ""
+
+    raw_value = raw_value.strip()
+    ftype = field.get("type", "text")
+
+    if ftype == "integer":
+        if raw_value == "":
+            return ""
+        try:
+            value_int = int(raw_value)
+            return str(value_int)
+        except ValueError:
+            # Keep original string if conversion fails
+            return raw_value
+
+    # text / select / textarea → return stripped string
+    return raw_value
+
+
+def append_row(device_cfg, event_cfg, fields, form_data):
+    """Append a new scouting entry to the CSV file.
+
+    Args:
+        device_cfg: Device configuration dict
+        event_cfg: Event configuration dict
+        fields: List of field definition dicts
+        form_data: Form data dict from request.form
+
+    Creates the CSV file with headers if it doesn't exist.
+    Adds metadata columns (timestamp, event, device) automatically.
+    """
+    ensure_csv_header(fields)
+
+    timestamp = datetime.datetime.now().isoformat(timespec="seconds")
+    config_id, event_name, event_season = get_event_ids(event_cfg)
+    device_id, device_name = get_device(device_cfg)
+
+    row = {
+        "timestamp": timestamp,
+        "event_name": event_name,
+        "event_season": event_season,
+        "config_id": config_id,
+        "device_id": device_id,
+        "device_name": device_name or "",
+    }
+
+    for field in fields:
+        name = field["name"]
+        raw_value = form_data.get(name, "")
+        row[name] = cast_value(field, raw_value)
+
+    header = get_csv_header(fields)
+    with CSV_FILE.open("a", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=header)
+        writer.writerow(row)
+
+
+def get_stats():
+    """Get statistics about the local CSV file.
+
+    Returns:
+        Dict with 'entries' count and 'last_timestamp' formatted string
+    """
+    if not CSV_FILE.exists():
+        return {
+            "entries": 0,
+            "last_timestamp": None,
+        }
+
+    with CSV_FILE.open("r", newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        rows = list(reader)
+
+    entries = len(rows)
+    last_ts_raw = rows[-1].get("timestamp") if rows else None
+
+    return {
+        "entries": entries,
+        "last_timestamp": format_timestamp(last_ts_raw),
+    }
+
+
+def load_all_rows():
+    """Load all rows from the local CSV file.
+
+    Returns:
+        List of dicts, one per CSV row. Empty list if file doesn't exist.
+    """
+    if not CSV_FILE.exists():
+        return []
+    with CSV_FILE.open("r", newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        return list(reader)

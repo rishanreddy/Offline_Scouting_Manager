@@ -6,3 +6,7 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Application Files
+device.json
+data

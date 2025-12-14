@@ -57,8 +57,9 @@ def load_config():
     device = cfg.get("device", {}) or {}
     event = cfg.get("event", {}) or {}
     fields = cfg.get("fields", []) or []
+    analysis = cfg.get("analysis", {}) or {}
 
-    return device, event, fields
+    return device, event, fields, analysis
 
 
 def get_device(device_cfg):
@@ -233,3 +234,114 @@ def load_all_rows():
     with CSV_FILE.open("r", newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         return list(reader)
+
+
+# Required field names that must exist in config
+REQUIRED_FIELDS = ["team", "auto_score", "teleop_score"]
+
+
+def validate_required_fields(fields):
+    """Ensure required fields exist in the config."""
+    field_names = [f["name"] for f in fields]
+    missing = [rf for rf in REQUIRED_FIELDS if rf not in field_names]
+    if missing:
+        raise ValueError(f"Missing required fields in config: {', '.join(missing)}")
+
+
+def get_team_data(team_number):
+    """Get all match data for a specific team."""
+    all_rows = load_all_rows()
+    team_matches = [
+        row for row in all_rows if str(row.get("team", "")) == str(team_number)
+    ]
+    return team_matches
+
+
+def calculate_team_stats(team_number, stat_fields=None):
+    """Calculate statistics for a team across all their matches."""
+    matches = get_team_data(team_number)
+
+    if not matches:
+        return {"team_number": team_number, "total_matches": 0, "stats": {}}
+
+    if stat_fields is None:
+        stat_fields = ["auto_score", "teleop_score"]
+
+    stats = {}
+    for field in stat_fields:
+        values = []
+        for match in matches:
+            val = match.get(field, "")
+            try:
+                values.append(float(val))
+            except (ValueError, TypeError):
+                continue
+
+        if values:
+            stats[field] = {
+                "average": round(sum(values) / len(values), 2),
+                "max": max(values),
+                "min": min(values),
+                "total": sum(values),
+            }
+        else:
+            stats[field] = {"average": 0, "max": 0, "min": 0, "total": 0}
+
+    return {
+        "team_number": team_number,
+        "total_matches": len(matches),
+        "stats": stats,
+        "matches": matches,
+    }
+
+
+def get_all_teams_summary(rows, stat_fields=None):
+    """Generate a summary for all teams from uploaded CSV data."""
+    if not rows:
+        return []
+
+    if stat_fields is None:
+        stat_fields = ["auto_score", "teleop_score"]
+
+    # Group by team
+    teams_data = {}
+    for row in rows:
+        team = str(row.get("team", ""))
+        if not team:
+            continue
+
+        if team not in teams_data:
+            teams_data[team] = []
+        teams_data[team].append(row)
+
+    # Calculate summary for each team
+    summaries = []
+    for team_number, matches in teams_data.items():
+        stats = {}
+        for field in stat_fields:
+            values = []
+            for match in matches:
+                val = match.get(field, "")
+                try:
+                    values.append(float(val))
+                except (ValueError, TypeError):
+                    continue
+
+            if values:
+                stats[field] = {
+                    "average": round(sum(values) / len(values), 2),
+                    "max": max(values),
+                    "min": min(values),
+                }
+            else:
+                stats[field] = {"average": 0, "max": 0, "min": 0}
+
+        summaries.append(
+            {"team_number": team_number, "total_matches": len(matches), "stats": stats}
+        )
+
+    # Sort by team number
+    summaries.sort(
+        key=lambda x: int(x["team_number"]) if x["team_number"].isdigit() else 0
+    )
+    return summaries

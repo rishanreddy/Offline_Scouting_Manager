@@ -1,11 +1,27 @@
+event:
+  name: "Rebuilt Regional"
+  season: "2026-2026"
+
 device:
-  name: "Main Scout Tablet"
+  name: "Scout Laptop"
   uniqueId: "SCOUT-001"
 
-event:
-  name: "Example Robotics Event"
-  season: "2024-2025"
+analysis:
+  # List numeric fields to graph and analyze (must exist in your CSV data)
+  # Simple format: just field name (defaults to 'line' chart)
+  # Advanced format: specify field and chart_type (line, area, or bar)
+  graph_fields:
+    - field: auto_score
+      chart_type: line
+    - field: teleop_score
+      chart_type: bar
 
+  matches_per_page: 25
+
+# REQUIRED FIELDS - Do not remove these, they are mandatory for the system
+# team: Team number
+# auto_score: Autonomous period score
+# teleop_score: Teleoperated period score
 fields:
   - name: match
     label: "Match #"
@@ -13,7 +29,7 @@ fields:
     required: true
 
   - name: team
-    label: "Team ID"
+    label: "Team Number"
     type: integer
     required: true
 

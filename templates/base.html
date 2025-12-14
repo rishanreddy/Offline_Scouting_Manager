@@ -13,11 +13,22 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='dist/output.css') }}"
     />
+    <!-- DataTables CSS -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='DataTables/jquery.dataTables.min.css') }}"
+    />
     <script src="{{ url_for('static', filename='node_modules/flowbite/dist/flowbite.min.js') }}"></script>
     {% block extra_head %}{% endblock %}
   </head>
   <body class="bg-gray-900 text-gray-100 min-h-screen">
-    {% include 'components/navbar.html' %} {% block content %}{% endblock %} {%
-    block extra_scripts %}{% endblock %}
+    {% include 'components/navbar.html' %} {% block content %}{% endblock %}
+    
+    <!-- Common Scripts -->
+    <script src="{{ url_for('static', filename='DataTables/jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='DataTables/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='chart.js/dist/chart.umd.min.js') }}"></script>
+    
+    {% block extra_scripts %}{% endblock %}
   </body>
 </html>
