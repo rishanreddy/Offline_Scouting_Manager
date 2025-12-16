@@ -24,6 +24,7 @@
     --color-orange-950: oklch(26.6% 0.079 36.259);
     --color-yellow-400: oklch(85.2% 0.199 91.936);
     --color-yellow-500: oklch(79.5% 0.184 86.047);
+    --color-yellow-600: oklch(68.1% 0.162 75.834);
     --color-lime-500: oklch(76.8% 0.233 130.85);
     --color-green-50: oklch(98.2% 0.018 155.826);
     --color-green-200: oklch(92.5% 0.084 155.995);
@@ -804,6 +805,9 @@
   .bg-white {
     background-color: var(--color-white);
   }
+  .bg-yellow-600 {
+    background-color: var(--color-yellow-600);
+  }
   .dark {
     & .selectedCell {
       background-color: var(--color-neutral-secondary-medium);
@@ -855,6 +859,9 @@
   }
   .py-2\.5 {
     padding-block: calc(var(--spacing) * 2.5);
+  }
+  .py-3 {
+    padding-block: calc(var(--spacing) * 3);
   }
   .py-6 {
     padding-block: calc(var(--spacing) * 6);
@@ -952,6 +959,9 @@
   }
   .text-gray-700 {
     color: var(--color-gray-700);
+  }
+  .text-gray-900 {
+    color: var(--color-gray-900);
   }
   .text-green-500 {
     color: var(--color-green-500);
@@ -1146,6 +1156,13 @@
     &:hover {
       @media (hover: hover) {
         color: var(--color-gray-300);
+      }
+    }
+  }
+  .hover\:text-gray-700 {
+    &:hover {
+      @media (hover: hover) {
+        color: var(--color-gray-700);
       }
     }
   }

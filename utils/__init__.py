@@ -26,6 +26,7 @@ from .temp_uploads import (
     load_combined_data_from_temp,
     clear_temp_uploads,
 )
+from .version_check import check_for_updates, CURRENT_VERSION
 
 __all__ = [
     # Constants
@@ -59,4 +60,7 @@ __all__ = [
     "save_uploaded_file",
     "load_combined_data_from_temp",
     "clear_temp_uploads",
+    # Version Check
+    "check_for_updates",
+    "CURRENT_VERSION",
 ]

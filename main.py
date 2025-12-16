@@ -9,9 +9,7 @@ from flask import (
     abort,
     session,
 )
-import csv
 import datetime
-import os
 
 from utils import (
     load_config,
@@ -26,6 +24,8 @@ from utils import (
     save_uploaded_file,
     load_combined_data_from_temp,
     clear_temp_uploads,
+    check_for_updates,
+    CURRENT_VERSION,
 )
 import hashlib
 
@@ -35,6 +35,14 @@ app = Flask(__name__)
 device_cfg, _, _, _ = load_config()
 device_id, _ = get_device(device_cfg)
 app.secret_key = hashlib.sha256(f"offline-scouting-{device_id}".encode()).hexdigest()
+
+# Check for updates on startup (non-blocking)
+update_info = check_for_updates()
+if update_info["update_available"]:
+    print(
+        f"\n⚠️  Update available! Current: v{CURRENT_VERSION}, Latest: v{update_info['latest_version']}"
+    )
+    print(f"   Download: {update_info['download_url']}\n")
 
 
 # --- Flask routes ---
@@ -356,6 +364,12 @@ def reset_data():
         CSV_FILE.unlink()
 
     return redirect(url_for("show_form", reset="1"))
+
+
+@app.route("/api/version")
+def version_info():
+    """API endpoint to get version and update information."""
+    return check_for_updates()
 
 
 if __name__ == "__main__":
