@@ -227,6 +227,8 @@ def settings():
         field_types = request.form.getlist("field_type")
         field_required_flags = request.form.getlist("field_required")
         field_options = request.form.getlist("field_options")
+        field_graph_enabled = request.form.getlist("field_graph_enabled")
+        field_chart_types = request.form.getlist("field_chart_type")
 
         user_fields = []
         seen_names = set()
@@ -286,6 +288,34 @@ def settings():
         if errors:
             error = " ".join(errors)
         else:
+            # Build graph_fields from enabled graphing configurations
+            # System fields: auto_score and teleop_score always line graphs, team never graphed
+            graph_fields = [
+                {"field": "auto_score", "chart_type": "line"},
+                {"field": "teleop_score", "chart_type": "line"}
+            ]
+            
+            # field_graph_enabled contains the index values of checked checkboxes for user fields
+            enabled_indices = set(int(val) for val in field_graph_enabled if val.isdigit())
+            
+            # Add user-defined graphed fields
+            for i, field in enumerate(new_fields):
+                # Skip system fields (indices 0, 1, 2)
+                if i < 3:
+                    continue
+                if i in enabled_indices:
+                    # Find the corresponding chart type
+                    # Count how many user field checkboxes were checked before this one
+                    user_checked_before = sum(1 for idx in enabled_indices if idx >= 3 and idx < i)
+                    if user_checked_before < len(field_chart_types):
+                        chart_type = field_chart_types[user_checked_before] or "line"
+                    else:
+                        chart_type = "line"
+                    graph_fields.append({
+                        "field": field["name"],
+                        "chart_type": chart_type
+                    })
+
             updated_device = {"name": str(device_name)}
             unique_id = device_cfg.get("uniqueId")
             if unique_id:
@@ -302,6 +332,8 @@ def settings():
             updated_analysis = dict(analysis_cfg or {})
             updated_analysis["matches_per_page"] = matches_per_page
             updated_analysis["expected_devices"] = expected_devices
+            # Always update graph_fields (includes system fields auto_score and teleop_score)
+            updated_analysis["graph_fields"] = graph_fields
 
             registry = load_registry()
             registry = set_expected_devices(registry, expected_devices)
@@ -611,7 +643,7 @@ def analyze():
                 stat_fields.append(field_item.get("field"))
             else:
                 stat_fields.append(field_item)
-        teams_summary = get_all_teams_summary(table_rows, stat_fields)
+        teams_summary = get_all_teams_summary(table_rows, stat_fields, fields)
 
         registry = register_from_rows(
             table_rows,
@@ -887,12 +919,12 @@ def team_info(team_number):
     # Try to get data from uploaded temp files first, fall back to local CSV
     temp_filenames = session.get("temp_filenames", None)
 
-    team_data = calculate_team_stats(team_number, stat_fields, temp_filenames)
+    team_data = calculate_team_stats(team_number, stat_fields, temp_filenames, fields)
 
     if team_data["total_matches"] == 0:
         abort(404, description=f"No data found for team {team_number}")
 
-    radar_data = get_radar_data(team_number, stat_fields, temp_filenames)
+    radar_data = get_radar_data(team_number, stat_fields, temp_filenames, fields)
 
     return render_template(
         "team_info.html",

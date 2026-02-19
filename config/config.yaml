@@ -8,7 +8,15 @@ analysis:
   - field: auto_score
     chart_type: line
   - field: teleop_score
-    chart_type: bar
+    chart_type: line
+  - field: fuel_accuracy
+    chart_type: line
+  - field: defense_1_5
+    chart_type: line
+  - field: reliable_1_5
+    chart_type: line
+  - field: climb_level_0_3
+    chart_type: line
   matches_per_page: 25
   expected_devices: 8
 fields:
@@ -16,32 +24,22 @@ fields:
   label: Team
   type: integer
   required: true
-  graph: false
-  graph_type: line
 - name: auto_score
   label: Auto Score
   type: integer
   required: true
-  graph: false
-  graph_type: line
 - name: teleop_score
   label: Teleop Score
   type: integer
   required: true
-  graph: false
-  graph_type: line
 - name: match
   label: 'Match #'
   type: integer
   required: true
-  graph: false
-  graph_type: line
 - name: alliance_color
   label: Alliance Color
   type: select
   required: true
-  graph: false
-  graph_type: line
   options:
   - Red
   - Blue
@@ -49,8 +47,6 @@ fields:
   label: Fuel Accuracy
   type: select
   required: true
-  graph: false
-  graph_type: line
   options:
   - Low
   - Medium
@@ -59,26 +55,18 @@ fields:
   label: What do they do when hub is inactive?
   type: textarea
   required: true
-  graph: false
-  graph_type: line
 - name: defense_1_5
   label: Defense (1-5)
   type: integer
   required: true
-  graph: false
-  graph_type: line
 - name: reliable_1_5
   label: Reliable (1-5)
   type: integer
   required: true
-  graph: false
-  graph_type: line
 - name: overall_role
   label: Overall Role
   type: select
   required: true
-  graph: false
-  graph_type: line
   options:
   - Primary Scorer
   - Secondary Scorer
@@ -88,17 +76,11 @@ fields:
   label: Climb Level (0-3)
   type: integer
   required: true
-  graph: false
-  graph_type: line
 - name: endgame_strat
   label: Endgame Strat
   type: text
   required: true
-  graph: false
-  graph_type: line
 - name: notes
   label: Notes
   type: textarea
   required: false
-  graph: false
-  graph_type: line

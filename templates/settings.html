@@ -113,21 +113,21 @@
           <div id="fieldsContainer" class="d-grid gap-3 mt-3">
             {# Always show required fields at the top, locked #}
             {% set required_field_defs = [
-              {'label': 'Team', 'type': 'integer'},
-              {'label': 'Auto Score', 'type': 'integer'},
-              {'label': 'Teleop Score', 'type': 'integer'}
+              {'label': 'Team', 'type': 'integer', 'graph': false},
+              {'label': 'Auto Score', 'type': 'integer', 'graph': true},
+              {'label': 'Teleop Score', 'type': 'integer', 'graph': true}
             ] %}
-            {% for req in required_field_defs %}
+            {% for req in required_field_defs %}{% set field_index = loop.index0 %}
             <div class="field-row border border-app rounded p-3 bg-app-surface-2 field-row-disabled" style="opacity:0.85;cursor:not-allowed;">
               <div class="row g-3 align-items-center">
                 <div class="col-lg-1 d-flex justify-content-center align-items-center">
                   <span class="sortable-handle" style="font-size:1.3em;color:#888;">&#9776;</span>
                 </div>
-                <div class="col-lg-5">
+                <div class="col-lg-4">
                   <label class="form-label">Label</label>
                   <input type="text" name="field_label" class="form-control" value="{{ req.label }}" required readonly tabindex="-1" />
                 </div>
-                <div class="col-lg-2">
+                <div class="col-lg-1">
                   <label class="form-label">Type</label>
                   <input type="hidden" name="field_type" value="{{ req.type }}" />
                   <select class="form-select" disabled tabindex="-1">
@@ -145,6 +145,22 @@
                     <option selected>Required</option>
                   </select>
                 </div>
+                <div class="col-lg-1">
+                  <label class="form-label">Graph</label>
+                  {% if req.graph %}
+                    <input type="checkbox" name="field_graph_enabled" value="{{ field_index }}" class="form-check-input graph-toggle" style="width:1.5rem;height:1.5rem;cursor:pointer;" checked disabled />
+                  {% else %}
+                    <input type="checkbox" name="field_graph_enabled" value="{{ field_index }}" class="form-check-input graph-toggle" style="width:1.5rem;height:1.5rem;cursor:not-allowed;" disabled />
+                  {% endif %}
+                </div>
+                <div class="col-lg-2 chart-type-field {% if not req.graph %}d-none{% endif %}">
+                  <label class="form-label">Chart</label>
+                  <select name="field_chart_type" class="form-select" disabled>
+                    <option value="line" selected>Line</option>
+                    <option value="bar">Bar</option>
+                    <option value="scatter">Scatter</option>
+                  </select>
+                </div>
                 <div class="col-lg-1 d-flex align-items-end">
                   <span class="small text-muted-app">System</span>
                 </div>
@@ -153,16 +169,30 @@
             {% endfor %}
             {# User-editable fields #}
             {% for field in fields if field.label not in ['Team', 'Auto Score', 'Teleop Score'] %}
+            {% set field_index = loop.index0 + 3 %}
+            {% set field_name = field.name %}
+            
+            {# Find graph settings for this field using namespace to persist across loop #}
+            {% set graph_info = namespace(enabled=false, chart_type='line') %}
+            
+            {% if analysis and 'graph_fields' in analysis %}
+              {% for gf in analysis['graph_fields'] %}
+                {% if gf['field'] == field_name %}
+                  {% set graph_info.enabled = true %}
+                  {% set graph_info.chart_type = gf['chart_type'] %}
+                {% endif %}
+              {% endfor %}
+            {% endif %}
             <div class="field-row border border-app rounded p-3 bg-app-surface-2" style="cursor:move;">
               <div class="row g-3 align-items-center">
                 <div class="col-lg-1 d-flex justify-content-center align-items-center">
                   <span class="sortable-handle" title="Drag to reorder" style="font-size:1.3em;cursor:grab;user-select:none;">&#9776;</span>
                 </div>
-                <div class="col-lg-5">
+                <div class="col-lg-4">
                   <label class="form-label">Label</label>
                   <input type="text" name="field_label" class="form-control" value="{{ field.label }}" required />
                 </div>
-                <div class="col-lg-2">
+                <div class="col-lg-1">
                   <label class="form-label">Type</label>
                   <select name="field_type" class="form-select">
                     <option value="text" {% if field.type == 'text' %}selected{% endif %}>Text</option>
@@ -188,6 +218,22 @@
                     <option value="false" {% if not field.required %}selected{% endif %}>No</option>
                   </select>
                 </div>
+                <div class="col-lg-1">
+                  <label class="form-label">Graph</label>
+                  {% if field.type in ['text', 'textarea'] %}
+                    <input type="checkbox" name="field_graph_enabled" value="{{ field_index }}" class="form-check-input" style="width:1.5rem;height:1.5rem;cursor:not-allowed;" disabled title="Cannot graph text/textarea fields" />
+                  {% else %}
+                    <input type="checkbox" name="field_graph_enabled" value="{{ field_index }}" class="form-check-input graph-toggle" style="width:1.5rem;height:1.5rem;cursor:pointer;" {% if graph_info.enabled %}checked{% endif %} />
+                  {% endif %}
+                </div>
+                <div class="col-lg-2 chart-type-field {% if not graph_info.enabled %}d-none{% endif %}">
+                  <label class="form-label">Chart</label>
+                  <select name="field_chart_type" class="form-select">
+                    <option value="line" {% if graph_info.chart_type == 'line' %}selected{% endif %}>Line</option>
+                    <option value="bar" {% if graph_info.chart_type == 'bar' %}selected{% endif %}>Bar</option>
+                    <option value="scatter" {% if graph_info.chart_type == 'scatter' %}selected{% endif %}>Scatter</option>
+                  </select>
+                </div>
                 <div class="col-lg-1 d-flex align-items-end">
                   <button type="button" class="btn btn-outline-danger btn-sm remove-field">Remove</button>
                 </div>
@@ -202,11 +248,11 @@
                 <div class="col-lg-1 d-flex justify-content-center align-items-center">
                   <span class="sortable-handle" title="Drag to reorder" style="font-size:1.3em;cursor:grab;user-select:none;">&#9776;</span>
                 </div>
-                <div class="col-lg-5">
+                <div class="col-lg-4">
                   <label class="form-label">Label</label>
                   <input type="text" name="field_label" class="form-control" required />
                 </div>
-                <div class="col-lg-2">
+                <div class="col-lg-1">
                   <label class="form-label">Type</label>
                   <select name="field_type" class="form-select">
                     <option value="text" selected>Text</option>
@@ -224,6 +270,18 @@
                   <select name="field_required" class="form-select">
                     <option value="true">Yes</option>
                     <option value="false" selected>No</option>
+                  </select>
+                </div>
+                <div class="col-lg-1">
+                  <label class="form-label">Graph</label>
+                  <input type="checkbox" name="field_graph_enabled" class="form-check-input graph-toggle" style="width:1.5rem;height:1.5rem;cursor:pointer;" />
+                </div>
+                <div class="col-lg-2 chart-type-field d-none">
+                  <label class="form-label">Chart</label>
+                  <select name="field_chart_type" class="form-select">
+                    <option value="line" selected>Line</option>
+                    <option value="bar">Bar</option>
+                    <option value="scatter">Scatter</option>
                   </select>
                 </div>
                 <div class="col-lg-1 d-flex align-items-end">
@@ -312,12 +370,40 @@
 
       const typeSelect = row.querySelector("select[name='field_type']");
       const optionsField = row.querySelector(".options-field");
+      const graphCheckbox = row.querySelector("input[name='field_graph_enabled']");
+      const chartTypeField = row.querySelector(".chart-type-field");
+      
       if (typeSelect && optionsField) {
         typeSelect.addEventListener("change", () => {
           if (typeSelect.value === "select") {
             optionsField.classList.remove("d-none");
           } else {
             optionsField.classList.add("d-none");
+          }
+          
+          // Disable graph checkbox for text/textarea fields
+          if (typeSelect.value === "text" || typeSelect.value === "textarea") {
+            if (graphCheckbox) {
+              graphCheckbox.disabled = true;
+              graphCheckbox.checked = false;
+              if (chartTypeField) {
+                chartTypeField.classList.add("d-none");
+              }
+            }
+          } else {
+            if (graphCheckbox) {
+              graphCheckbox.disabled = false;
+            }
+          }
+        });
+      }
+
+      if (graphCheckbox && chartTypeField) {
+        graphCheckbox.addEventListener("change", () => {
+          if (graphCheckbox.checked) {
+            chartTypeField.classList.remove("d-none");
+          } else {
+            chartTypeField.classList.add("d-none");
           }
         });
       }
@@ -328,6 +414,14 @@
     addBtn.addEventListener("click", () => {
       const clone = template.content.cloneNode(true);
       const row = clone.querySelector(".field-row");
+      const fieldIndex = container.querySelectorAll(".field-row").length;
+      
+      // Set checkbox value to field index
+      const checkbox = clone.querySelector("input[name='field_graph_enabled']");
+      if (checkbox) {
+        checkbox.value = fieldIndex;
+      }
+      
       container.appendChild(clone);
       if (row) bindRow(row);
     });
