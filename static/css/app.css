@@ -1,3 +1,15 @@
+/* Drag-and-drop styles for sortable fields */
+.sortable-ghost {
+  opacity: 0.5;
+  background: #222b3a !important;
+  border: 2px dashed var(--app-accent) !important;
+}
+.sortable-chosen {
+  box-shadow: 0 0 0 2px var(--app-accent);
+}
+.sortable-drag {
+  opacity: 0.8;
+}
 /* Custom Bootstrap theme tweaks (offline, no build step) */
 
 :root {

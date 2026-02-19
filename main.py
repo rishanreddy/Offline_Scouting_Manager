@@ -55,6 +55,7 @@ from utils import (
     APP_STATE_FILE,
     check_for_updates,
     CURRENT_VERSION,
+    generate_field_name,
 )
 
 app = Flask(__name__)
@@ -197,6 +198,7 @@ def settings():
     saved = request.args.get("saved") == "1"
     reset_done = request.args.get("reset") == "1"
 
+
     if request.method == "POST":
         event_name = (request.form.get("event_name") or "").strip()
         event_season = (request.form.get("event_season") or "").strip()
@@ -212,51 +214,67 @@ def settings():
         if expected_devices_raw.isdigit():
             expected_devices = max(1, min(50, int(expected_devices_raw)))
 
-        field_names = request.form.getlist("field_name")
+        # Define required field labels and types (must match REQUIRED_FIELDS order)
+        required_field_defs = [
+            {"label": "Team", "type": "integer"},
+            {"label": "Auto Score", "type": "integer"},
+            {"label": "Teleop Score", "type": "integer"},
+        ]
+        required_field_names = [generate_field_name(f["label"]) for f in required_field_defs]
+
+        # Parse user fields, skipping any that match required field names (they will be inserted in correct order)
         field_labels = request.form.getlist("field_label")
         field_types = request.form.getlist("field_type")
         field_required_flags = request.form.getlist("field_required")
         field_options = request.form.getlist("field_options")
 
-        new_fields = []
+        user_fields = []
         seen_names = set()
         errors = []
 
-        for i, raw_name in enumerate(field_names):
-            name = (raw_name or "").strip()
-            if not name:
+        for i, label in enumerate(field_labels):
+            label = (label or "").strip()
+            if not label:
                 continue
-
-            label = (field_labels[i] if i < len(field_labels) else "").strip()
             field_type = field_types[i] if i < len(field_types) else "text"
             required_flag = (
                 field_required_flags[i] if i < len(field_required_flags) else "false"
             )
             options_raw = field_options[i] if i < len(field_options) else ""
-
+            name = generate_field_name(label)
+            if name in required_field_names:
+                continue  # skip, will be inserted in correct order below
             if name in seen_names:
-                errors.append(f"Duplicate field name: {name}")
+                errors.append(f"Duplicate field name: {name} (generated from '{label}')")
                 continue
             seen_names.add(name)
-
             field_def = {
                 "name": name,
-                "label": label or name,
+                "label": label,
                 "type": field_type,
                 "required": required_flag == "true",
             }
-
             if field_type == "select":
                 options = [opt.strip() for opt in options_raw.split(",") if opt.strip()]
                 if not options:
-                    errors.append(
-                        f"Select field '{label or name}' must include options."
-                    )
+                    errors.append(f"Select field '{label}' must include options.")
                 field_def["options"] = options
+            user_fields.append(field_def)
 
-            new_fields.append(field_def)
+        # Always insert required fields at the top, with correct label/type
+        new_fields = []
+        for req, req_name in zip(required_field_defs, required_field_names):
+            new_fields.append({
+                "name": req_name,
+                "label": req["label"],
+                "type": req["type"],
+                "required": True,
+            })
+        new_fields.extend(user_fields)
 
-        missing_required = [rf for rf in REQUIRED_FIELDS if rf not in seen_names]
+        # Validation: ensure all required fields are present
+        present_names = {f["name"] for f in new_fields}
+        missing_required = [rf for rf in required_field_names if rf not in present_names]
         if missing_required:
             errors.append(f"Missing required fields: {', '.join(missing_required)}")
 
@@ -297,18 +315,18 @@ def settings():
             save_app_state(state)
             return redirect(url_for("settings", saved="1"))
 
-        return render_template(
-            "settings.html",
-            event=event,
-            device=device_cfg,
-            device_name=device_cfg.get("name") or device_cfg.get("uniqueId"),
-            fields=fields,
-            analysis=analysis_cfg,
-            required_fields=REQUIRED_FIELDS,
-            error=error,
-            saved=saved,
-            reset_done=reset_done,
-        )
+    return render_template(
+        "settings.html",
+        event=event,
+        device=device_cfg,
+        device_name=device_cfg.get("name") or device_cfg.get("uniqueId"),
+        fields=fields,
+        analysis=analysis_cfg,
+        required_fields=REQUIRED_FIELDS,
+        error=error,
+        saved=saved,
+        reset_done=reset_done,
+    )
 
 
 @app.route("/settings/reset", methods=["POST"])

@@ -111,37 +111,65 @@
           </p>
 
           <div id="fieldsContainer" class="d-grid gap-3 mt-3">
-            {% for field in fields %}
-            <div class="field-row border border-app rounded p-3 bg-app-surface-2">
-              <div class="row g-3">
-                <div class="col-lg-3">
-                  <label class="form-label">Label</label>
-                  <input type="text" name="field_label" class="form-control" value="{{ field.label }}" required />
+            {# Always show required fields at the top, locked #}
+            {% set required_field_defs = [
+              {'label': 'Team', 'type': 'integer'},
+              {'label': 'Auto Score', 'type': 'integer'},
+              {'label': 'Teleop Score', 'type': 'integer'}
+            ] %}
+            {% for req in required_field_defs %}
+            <div class="field-row border border-app rounded p-3 bg-app-surface-2 field-row-disabled" style="opacity:0.85;cursor:not-allowed;">
+              <div class="row g-3 align-items-center">
+                <div class="col-lg-1 d-flex justify-content-center align-items-center">
+                  <span class="sortable-handle" style="font-size:1.3em;color:#888;">&#9776;</span>
                 </div>
-                <div class="col-lg-3">
-                  <label class="form-label">Field Name</label>
-                  {% if field.name in required_fields %}
-                    <input type="hidden" name="field_name" value="{{ field.name }}" />
-                    <input type="text" class="form-control" value="{{ field.name }}" disabled />
-                  {% else %}
-                    <input type="text" name="field_name" class="form-control" value="{{ field.name }}" required />
-                  {% endif %}
+                <div class="col-lg-5">
+                  <label class="form-label">Label</label>
+                  <input type="text" name="field_label" class="form-control" value="{{ req.label }}" required readonly tabindex="-1" />
                 </div>
                 <div class="col-lg-2">
                   <label class="form-label">Type</label>
-                  {% if field.name in required_fields %}
-                    <input type="hidden" name="field_type" value="{{ field.type }}" />
-                    <select class="form-select" disabled>
-                      <option selected>{{ field.type }}</option>
-                    </select>
-                  {% else %}
-                    <select name="field_type" class="form-select">
-                      <option value="text" {% if field.type == 'text' %}selected{% endif %}>Text</option>
-                      <option value="integer" {% if field.type == 'integer' %}selected{% endif %}>Number</option>
-                      <option value="select" {% if field.type == 'select' %}selected{% endif %}>Select</option>
-                      <option value="textarea" {% if field.type == 'textarea' %}selected{% endif %}>Textarea</option>
-                    </select>
-                  {% endif %}
+                  <input type="hidden" name="field_type" value="{{ req.type }}" />
+                  <select class="form-select" disabled tabindex="-1">
+                    <option selected>{{ req.type }}</option>
+                  </select>
+                </div>
+                <div class="col-lg-2 options-field d-none">
+                  <label class="form-label">Options</label>
+                  <input type="text" name="field_options" class="form-control" value="" readonly tabindex="-1" />
+                </div>
+                <div class="col-lg-1">
+                  <label class="form-label">Required</label>
+                  <input type="hidden" name="field_required" value="true" />
+                  <select class="form-select" disabled tabindex="-1">
+                    <option selected>Required</option>
+                  </select>
+                </div>
+                <div class="col-lg-1 d-flex align-items-end">
+                  <span class="small text-muted-app">System</span>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+            {# User-editable fields #}
+            {% for field in fields if field.label not in ['Team', 'Auto Score', 'Teleop Score'] %}
+            <div class="field-row border border-app rounded p-3 bg-app-surface-2" style="cursor:move;">
+              <div class="row g-3 align-items-center">
+                <div class="col-lg-1 d-flex justify-content-center align-items-center">
+                  <span class="sortable-handle" title="Drag to reorder" style="font-size:1.3em;cursor:grab;user-select:none;">&#9776;</span>
+                </div>
+                <div class="col-lg-5">
+                  <label class="form-label">Label</label>
+                  <input type="text" name="field_label" class="form-control" value="{{ field.label }}" required />
+                </div>
+                <div class="col-lg-2">
+                  <label class="form-label">Type</label>
+                  <select name="field_type" class="form-select">
+                    <option value="text" {% if field.type == 'text' %}selected{% endif %}>Text</option>
+                    <option value="integer" {% if field.type == 'integer' %}selected{% endif %}>Number</option>
+                    <option value="select" {% if field.type == 'select' %}selected{% endif %}>Select</option>
+                    <option value="textarea" {% if field.type == 'textarea' %}selected{% endif %}>Textarea</option>
+                  </select>
                 </div>
                 <div class="col-lg-2 options-field {% if field.type != 'select' %}d-none{% endif %}">
                   <label class="form-label">Options</label>
@@ -155,24 +183,13 @@
                 </div>
                 <div class="col-lg-1">
                   <label class="form-label">Required</label>
-                  {% if field.name in required_fields %}
-                    <input type="hidden" name="field_required" value="true" />
-                    <select class="form-select" disabled>
-                      <option selected>Required</option>
-                    </select>
-                  {% else %}
-                    <select name="field_required" class="form-select">
-                      <option value="true" {% if field.required %}selected{% endif %}>Yes</option>
-                      <option value="false" {% if not field.required %}selected{% endif %}>No</option>
-                    </select>
-                  {% endif %}
+                  <select name="field_required" class="form-select">
+                    <option value="true" {% if field.required %}selected{% endif %}>Yes</option>
+                    <option value="false" {% if not field.required %}selected{% endif %}>No</option>
+                  </select>
                 </div>
                 <div class="col-lg-1 d-flex align-items-end">
-                  {% if field.name not in required_fields %}
-                    <button type="button" class="btn btn-outline-danger btn-sm remove-field">Remove</button>
-                  {% else %}
-                    <span class="small text-muted-app">System</span>
-                  {% endif %}
+                  <button type="button" class="btn btn-outline-danger btn-sm remove-field">Remove</button>
                 </div>
               </div>
             </div>
@@ -180,15 +197,14 @@
           </div>
 
           <template id="fieldRowTemplate">
-            <div class="field-row border border-app rounded p-3 bg-app-surface-2">
-              <div class="row g-3">
-                <div class="col-lg-3">
+            <div class="field-row border border-app rounded p-3 bg-app-surface-2" style="cursor:move;">
+              <div class="row g-3 align-items-center">
+                <div class="col-lg-1 d-flex justify-content-center align-items-center">
+                  <span class="sortable-handle" title="Drag to reorder" style="font-size:1.3em;cursor:grab;user-select:none;">&#9776;</span>
+                </div>
+                <div class="col-lg-5">
                   <label class="form-label">Label</label>
                   <input type="text" name="field_label" class="form-control" required />
-                </div>
-                <div class="col-lg-3">
-                  <label class="form-label">Field Name</label>
-                  <input type="text" name="field_name" class="form-control" required />
                 </div>
                 <div class="col-lg-2">
                   <label class="form-label">Type</label>
@@ -280,6 +296,8 @@
 {% endblock %}
 
 {% block extra_scripts %}
+<script src="{{ url_for('static', filename='vendor/sortable.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/sortable-init.js') }}"></script>
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const addBtn = document.getElementById("addFieldBtn");

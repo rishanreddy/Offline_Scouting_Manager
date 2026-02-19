@@ -1,6 +1,7 @@
 """Configuration loading and device management."""
 
 import json
+import re
 import shutil
 import uuid
 from datetime import datetime
@@ -15,6 +16,31 @@ from .constants import (
     REQUIRED_FIELDS,
     SECRET_FILE,
 )
+
+
+def generate_field_name(label: str) -> str:
+    """Generate a field name from a human-readable label.
+    
+    Converts labels like "Auto Score" -> "auto_score"
+    
+    Args:
+        label: Human-readable field label
+        
+    Returns:
+        Snake case field name
+    """
+    # Convert to lowercase
+    name = label.strip().lower()
+    # Replace spaces and hyphens with underscores
+    name = re.sub(r'[\s\-]+', '_', name)
+    # Remove any non-alphanumeric characters except underscores
+    name = re.sub(r'[^a-z0-9_]', '', name)
+    # Remove leading/trailing underscores
+    name = name.strip('_')
+    # Replace multiple underscores with single underscore
+    name = re.sub(r'_+', '_', name)
+    
+    return name or "field"
 
 
 def load_config():

@@ -1,8 +1,8 @@
 device:
-  name: ""
+  name: Pit S
 event:
-  name: ""
-  season: ""
+  name: REbulildjfslk
+  season: '9999'
 analysis:
   graph_fields:
   - field: auto_score
@@ -12,42 +12,93 @@ analysis:
   matches_per_page: 25
   expected_devices: 8
 fields:
+- name: team
+  label: Team
+  type: integer
+  required: true
+  graph: false
+  graph_type: line
+- name: auto_score
+  label: Auto Score
+  type: integer
+  required: true
+  graph: false
+  graph_type: line
+- name: teleop_score
+  label: Teleop Score
+  type: integer
+  required: true
+  graph: false
+  graph_type: line
 - name: match
   label: 'Match #'
   type: integer
   required: true
-- name: team
-  label: Team Number
-  type: integer
-  required: true
-- name: scout_name
-  label: Scout name
-  type: text
-  required: true
+  graph: false
+  graph_type: line
 - name: alliance_color
-  label: Alliance
+  label: Alliance Color
   type: select
   required: true
+  graph: false
+  graph_type: line
   options:
   - Red
   - Blue
-- name: auto_score
-  label: Auto score
-  type: integer
-  required: true
-- name: teleop_score
-  label: Tele-op score
-  type: integer
-  required: true
-- name: endgame
-  label: Endgame status
+- name: fuel_accuracy
+  label: Fuel Accuracy
   type: select
   required: true
+  graph: false
+  graph_type: line
   options:
-  - Failed
-  - Partial
-  - Complete
+  - Low
+  - Medium
+  - High
+- name: what_do_they_do_when_hub_is_inactive
+  label: What do they do when hub is inactive?
+  type: textarea
+  required: true
+  graph: false
+  graph_type: line
+- name: defense_1_5
+  label: Defense (1-5)
+  type: integer
+  required: true
+  graph: false
+  graph_type: line
+- name: reliable_1_5
+  label: Reliable (1-5)
+  type: integer
+  required: true
+  graph: false
+  graph_type: line
+- name: overall_role
+  label: Overall Role
+  type: select
+  required: true
+  graph: false
+  graph_type: line
+  options:
+  - Primary Scorer
+  - Secondary Scorer
+  - Support Bot
+  - Defender
+- name: climb_level_0_3
+  label: Climb Level (0-3)
+  type: integer
+  required: true
+  graph: false
+  graph_type: line
+- name: endgame_strat
+  label: Endgame Strat
+  type: text
+  required: true
+  graph: false
+  graph_type: line
 - name: notes
   label: Notes
   type: textarea
   required: false
+  graph: false
+  graph_type: line
