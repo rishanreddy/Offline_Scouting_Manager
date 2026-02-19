@@ -55,6 +55,7 @@ from utils import (
     APP_STATE_FILE,
     check_for_updates,
     CURRENT_VERSION,
+    generate_field_name,
 )
 
 app = Flask(__name__)
@@ -197,6 +198,7 @@ def settings():
     saved = request.args.get("saved") == "1"
     reset_done = request.args.get("reset") == "1"
 
+
     if request.method == "POST":
         event_name = (request.form.get("event_name") or "").strip()
         event_season = (request.form.get("event_season") or "").strip()
@@ -212,51 +214,69 @@ def settings():
         if expected_devices_raw.isdigit():
             expected_devices = max(1, min(50, int(expected_devices_raw)))
 
-        field_names = request.form.getlist("field_name")
+        # Define required field labels and types (must match REQUIRED_FIELDS order)
+        required_field_defs = [
+            {"label": "Team", "type": "integer"},
+            {"label": "Auto Score", "type": "integer"},
+            {"label": "Teleop Score", "type": "integer"},
+        ]
+        required_field_names = [generate_field_name(f["label"]) for f in required_field_defs]
+
+        # Parse user fields, skipping any that match required field names (they will be inserted in correct order)
         field_labels = request.form.getlist("field_label")
         field_types = request.form.getlist("field_type")
         field_required_flags = request.form.getlist("field_required")
         field_options = request.form.getlist("field_options")
+        field_graph_enabled = request.form.getlist("field_graph_enabled")
+        field_chart_types = request.form.getlist("field_chart_type")
 
-        new_fields = []
+        user_fields = []
         seen_names = set()
         errors = []
 
-        for i, raw_name in enumerate(field_names):
-            name = (raw_name or "").strip()
-            if not name:
+        for i, label in enumerate(field_labels):
+            label = (label or "").strip()
+            if not label:
                 continue
-
-            label = (field_labels[i] if i < len(field_labels) else "").strip()
             field_type = field_types[i] if i < len(field_types) else "text"
             required_flag = (
                 field_required_flags[i] if i < len(field_required_flags) else "false"
             )
             options_raw = field_options[i] if i < len(field_options) else ""
-
+            name = generate_field_name(label)
+            if name in required_field_names:
+                continue  # skip, will be inserted in correct order below
             if name in seen_names:
-                errors.append(f"Duplicate field name: {name}")
+                errors.append(f"Duplicate field name: {name} (generated from '{label}')")
                 continue
             seen_names.add(name)
-
             field_def = {
                 "name": name,
-                "label": label or name,
+                "label": label,
                 "type": field_type,
                 "required": required_flag == "true",
             }
-
             if field_type == "select":
                 options = [opt.strip() for opt in options_raw.split(",") if opt.strip()]
                 if not options:
-                    errors.append(
-                        f"Select field '{label or name}' must include options."
-                    )
+                    errors.append(f"Select field '{label}' must include options.")
                 field_def["options"] = options
+            user_fields.append(field_def)
 
-            new_fields.append(field_def)
+        # Always insert required fields at the top, with correct label/type
+        new_fields = []
+        for req, req_name in zip(required_field_defs, required_field_names):
+            new_fields.append({
+                "name": req_name,
+                "label": req["label"],
+                "type": req["type"],
+                "required": True,
+            })
+        new_fields.extend(user_fields)
 
-        missing_required = [rf for rf in REQUIRED_FIELDS if rf not in seen_names]
+        # Validation: ensure all required fields are present
+        present_names = {f["name"] for f in new_fields}
+        missing_required = [rf for rf in required_field_names if rf not in present_names]
         if missing_required:
             errors.append(f"Missing required fields: {', '.join(missing_required)}")
 
@@ -268,6 +288,34 @@ def settings():
         if errors:
             error = " ".join(errors)
         else:
+            # Build graph_fields from enabled graphing configurations
+            # System fields: auto_score and teleop_score always line graphs, team never graphed
+            graph_fields = [
+                {"field": "auto_score", "chart_type": "line"},
+                {"field": "teleop_score", "chart_type": "line"}
+            ]
+            
+            # field_graph_enabled contains the index values of checked checkboxes for user fields
+            enabled_indices = set(int(val) for val in field_graph_enabled if val.isdigit())
+            
+            # Add user-defined graphed fields
+            for i, field in enumerate(new_fields):
+                # Skip system fields (indices 0, 1, 2)
+                if i < 3:
+                    continue
+                if i in enabled_indices:
+                    # Find the corresponding chart type
+                    # Count how many user field checkboxes were checked before this one
+                    user_checked_before = sum(1 for idx in enabled_indices if idx >= 3 and idx < i)
+                    if user_checked_before < len(field_chart_types):
+                        chart_type = field_chart_types[user_checked_before] or "line"
+                    else:
+                        chart_type = "line"
+                    graph_fields.append({
+                        "field": field["name"],
+                        "chart_type": chart_type
+                    })
+
             updated_device = {"name": str(device_name)}
             unique_id = device_cfg.get("uniqueId")
             if unique_id:
@@ -284,6 +332,8 @@ def settings():
             updated_analysis = dict(analysis_cfg or {})
             updated_analysis["matches_per_page"] = matches_per_page
             updated_analysis["expected_devices"] = expected_devices
+            # Always update graph_fields (includes system fields auto_score and teleop_score)
+            updated_analysis["graph_fields"] = graph_fields
 
             registry = load_registry()
             registry = set_expected_devices(registry, expected_devices)
@@ -297,18 +347,18 @@ def settings():
             save_app_state(state)
             return redirect(url_for("settings", saved="1"))
 
-        return render_template(
-            "settings.html",
-            event=event,
-            device=device_cfg,
-            device_name=device_cfg.get("name") or device_cfg.get("uniqueId"),
-            fields=fields,
-            analysis=analysis_cfg,
-            required_fields=REQUIRED_FIELDS,
-            error=error,
-            saved=saved,
-            reset_done=reset_done,
-        )
+    return render_template(
+        "settings.html",
+        event=event,
+        device=device_cfg,
+        device_name=device_cfg.get("name") or device_cfg.get("uniqueId"),
+        fields=fields,
+        analysis=analysis_cfg,
+        required_fields=REQUIRED_FIELDS,
+        error=error,
+        saved=saved,
+        reset_done=reset_done,
+    )
 
 
 @app.route("/settings/reset", methods=["POST"])
@@ -593,7 +643,7 @@ def analyze():
                 stat_fields.append(field_item.get("field"))
             else:
                 stat_fields.append(field_item)
-        teams_summary = get_all_teams_summary(table_rows, stat_fields)
+        teams_summary = get_all_teams_summary(table_rows, stat_fields, fields)
 
         registry = register_from_rows(
             table_rows,
@@ -869,12 +919,12 @@ def team_info(team_number):
     # Try to get data from uploaded temp files first, fall back to local CSV
     temp_filenames = session.get("temp_filenames", None)
 
-    team_data = calculate_team_stats(team_number, stat_fields, temp_filenames)
+    team_data = calculate_team_stats(team_number, stat_fields, temp_filenames, fields)
 
     if team_data["total_matches"] == 0:
         abort(404, description=f"No data found for team {team_number}")
 
-    radar_data = get_radar_data(team_number, stat_fields, temp_filenames)
+    radar_data = get_radar_data(team_number, stat_fields, temp_filenames, fields)
 
     return render_template(
         "team_info.html",

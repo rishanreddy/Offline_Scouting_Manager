@@ -1,0 +1,81 @@
+team,match,alliance_color,auto_score,teleop_score,fuel_accuracy,what_do_they_do_when_hub_is_inactive,defense_1_5,reliable_1_5,overall_role,climb_level_0_3,endgame_strat,notes,device_name
+1234,1,Red,25,65,High,Aggressive offense,2,5,Primary Scorer,3,Perfect climb,Dominant scorer,Scout Laptop 1
+1234,2,Blue,28,68,High,Push balls forward,2,5,Primary Scorer,3,Consistent climb,Strong as always,Scout Laptop 1
+1234,3,Red,26,66,High,Score everything,1,5,Primary Scorer,3,Great climb,Excellent auto,Scout Laptop 2
+1234,4,Blue,27,67,High,Never idle,2,5,Primary Scorer,3,Perfect climb,Best team,Scout Laptop 1
+1234,5,Red,25,64,High,Always scoring,2,5,Primary Scorer,3,Climb success,Consistent,Scout Laptop 2
+1234,6,Blue,29,70,High,Aggressive play,1,5,Primary Scorer,3,Perfect,Outstanding,Scout Laptop 1
+1234,7,Red,26,65,High,Ball control,2,5,Primary Scorer,3,Success,Reliable,Scout Laptop 2
+1234,8,Blue,28,69,High,Constant pressure,2,5,Primary Scorer,3,Great climb,Solid match,Scout Laptop 1
+1234,9,Red,27,66,High,Strategic scoring,1,5,Primary Scorer,3,Perfect,Strong finish,Scout Laptop 2
+1234,10,Blue,26,67,High,Offensive focus,2,5,Primary Scorer,3,Success,Excellent,Scout Laptop 1
+2468,1,Blue,8,15,Low,Climbing prep,1,3,Support Bot,3,Excellent climb,Weak scorer,Scout Laptop 2
+2468,2,Red,7,18,Low,Getting to hang,1,3,Support Bot,3,Perfect climb,Specialist climber,Scout Laptop 1
+2468,3,Blue,9,12,Low,Ignores scoring,1,2,Support Bot,3,Great climb,Only climbs,Scout Laptop 2
+2468,4,Red,6,14,Low,Not scoring,2,2,Support Bot,3,Success,Pure climber,Scout Laptop 1
+2468,5,Blue,8,16,Low,Focus on climb,1,3,Support Bot,3,Perfect,Limited offense,Scout Laptop 2
+2468,6,Red,7,13,Low,Endgame only,1,2,Support Bot,3,Excellent,Bad scorer,Scout Laptop 1
+2468,7,Blue,9,17,Low,Climb specialist,1,3,Support Bot,3,Success,Weak offense,Scout Laptop 2
+2468,8,Red,8,15,Low,Limited scoring,2,2,Support Bot,3,Great,One-trick,Scout Laptop 1
+2468,9,Blue,7,12,Low,Hybrid robot,1,2,Support Bot,3,Perfect,Climbing focus,Scout Laptop 2
+2468,10,Red,8,16,Low,Climb bot,1,3,Support Bot,3,Success,Endgame master,Scout Laptop 1
+3579,1,Red,22,72,High,Aggressive offense,3,4,Primary Scorer,1,No climb,Strong shooter,Scout Laptop 1
+3579,2,Blue,20,70,High,Only shooting,2,4,Primary Scorer,0,Failed,Bad climber,Scout Laptop 2
+3579,3,Red,23,71,High,Ignore climbing,3,4,Primary Scorer,1,Attempt,Pure scorer,Scout Laptop 1
+3579,4,Blue,21,73,High,Strategic shots,2,4,Primary Scorer,0,Failed,Good offense,Scout Laptop 2
+3579,5,Red,22,72,High,Ball domination,3,4,Primary Scorer,1,No attempt,Scoring beast,Scout Laptop 1
+3579,6,Blue,20,69,High,Focus offense,2,4,Primary Scorer,0,Failed,Weak climber,Scout Laptop 2
+3579,7,Red,23,74,High,Never climbs,3,4,Primary Scorer,1,Nope,Master scorer,Scout Laptop 1
+3579,8,Blue,21,71,High,Shooting focus,2,4,Primary Scorer,0,Failed,Decent score,Scout Laptop 2
+3579,9,Red,24,75,High,Unstoppable offense,3,4,Primary Scorer,1,No climb,Excellent,Scout Laptop 1
+3579,10,Blue,22,72,High,Offensive specialist,2,4,Primary Scorer,0,Failed,Solid offense,Scout Laptop 2
+4891,1,Blue,5,8,Low,Defending position,5,2,Defender,0,No climb,Defensive only,Scout Laptop 2
+4891,2,Red,4,7,Low,Block balls,5,1,Defender,0,Failed,Bad robot,Scout Laptop 1
+4891,3,Blue,6,9,Low,Defense focus,5,2,Defender,0,No attempt,Limited robot,Scout Laptop 2
+4891,4,Red,5,8,Low,Just defend,5,1,Defender,0,Failed,Very weak,Scout Laptop 1
+4891,5,Blue,4,6,Low,Defensive role,5,2,Defender,0,No climb,Poor performer,Scout Laptop 2
+4891,6,Red,5,7,Low,Only defense,5,1,Defender,0,Failed,Struggling,Scout Laptop 1
+4891,7,Blue,6,8,Low,Block strategy,5,2,Defender,0,No attempt,One-trick,Scout Laptop 2
+4891,8,Red,4,7,Low,Defense specialist,5,1,Defender,0,Failed,Weak,Scout Laptop 1
+4891,9,Blue,5,9,Low,Defensive bot,5,2,Defender,0,No climb,Limited,Scout Laptop 2
+4891,10,Red,4,8,Low,Ignore offense,5,1,Defender,0,Failed,Bad overall,Scout Laptop 1
+5001,1,Red,18,52,Medium,Balanced play,3,3,Primary Scorer,2,Attempt,Decent team,Scout Laptop 1
+5001,2,Blue,17,50,Medium,Steady shots,3,3,Secondary Scorer,1,Partial,Average,Scout Laptop 2
+5001,3,Red,19,51,Medium,Some defense,2,3,Primary Scorer,2,Good,Okay,Scout Laptop 1
+5001,4,Blue,16,48,Low,Less focus,3,2,Secondary Scorer,1,Failed,Off day,Scout Laptop 2
+5001,5,Red,18,52,Medium,Balanced,3,3,Primary Scorer,2,Attempt,Better,Scout Laptop 1
+5001,6,Blue,17,49,Medium,Inconsistent,2,2,Secondary Scorer,1,No climb,Weak,Scout Laptop 2
+5001,7,Red,20,53,Medium,Good day,3,3,Primary Scorer,2,Success,Improved,Scout Laptop 1
+5001,8,Blue,15,47,Low,Struggling,3,2,Secondary Scorer,0,Failed,Poor,Scout Laptop 2
+5001,9,Red,18,51,Medium,Back on track,3,3,Primary Scorer,2,Attempt,Recovery,Scout Laptop 1
+5001,10,Blue,17,50,Medium,Mediocre,2,3,Secondary Scorer,1,Partial,Average,Scout Laptop 2
+6234,1,Blue,32,8,High,Dominate auto,2,5,Primary Scorer,1,No climb,Early game star,Scout Laptop 2
+6234,2,Red,30,10,High,Auto specialist,2,5,Primary Scorer,0,Failed,Early dominant,Scout Laptop 1
+6234,3,Blue,33,7,High,Auto powerhouse,2,5,Primary Scorer,1,No attempt,Best in auto,Scout Laptop 2
+6234,4,Red,31,9,High,Early dominant,1,5,Primary Scorer,0,Failed,Auto machine,Scout Laptop 1
+6234,5,Blue,32,8,High,Strong start,2,5,Primary Scorer,1,No climb,Auto specialist,Scout Laptop 2
+6234,6,Red,30,11,High,Early lead,2,5,Primary Scorer,0,Failed,Good auto,Scout Laptop 1
+6234,7,Blue,33,9,High,Auto focus,1,5,Primary Scorer,1,Nope,Best early game,Scout Laptop 2
+6234,8,Red,31,10,High,Excellent start,2,5,Primary Scorer,0,Failed,Strong auto,Scout Laptop 1
+6234,9,Blue,32,8,High,Early dominator,2,5,Primary Scorer,1,No climb,Consistent auto,Scout Laptop 2
+6234,10,Red,30,9,High,Auto specialist,2,5,Primary Scorer,0,Failed,Early game,Scout Laptop 1
+7890,1,Red,12,62,High,Late game focus,2,4,Primary Scorer,3,Great climb,Clutch player,Scout Laptop 1
+7890,2,Blue,11,64,High,Builds momentum,2,4,Primary Scorer,3,Perfect,Strong finish,Scout Laptop 2
+7890,3,Red,13,63,High,Teleop dominator,1,4,Primary Scorer,3,Excellent,Closes out,Scout Laptop 1
+7890,4,Blue,10,65,High,Late game specialist,2,4,Primary Scorer,3,Success,Clutch,Scout Laptop 2
+7890,5,Red,12,61,High,Strong endgame,2,4,Primary Scorer,3,Good,Late dominator,Scout Laptop 1
+7890,6,Blue,11,63,High,Momentum builder,1,4,Primary Scorer,3,Perfect,Closes strong,Scout Laptop 2
+7890,7,Red,13,64,High,Teleop focus,2,4,Primary Scorer,3,Great,Strong closer,Scout Laptop 1
+7890,8,Blue,12,62,High,Endgame specialist,2,4,Primary Scorer,3,Success,Reliable closer,Scout Laptop 2
+7890,9,Red,11,66,High,Late bloomer,1,4,Primary Scorer,3,Perfect,Excellent finish,Scout Laptop 1
+7890,10,Blue,12,63,High,Strong teleop,2,4,Primary Scorer,3,Good,Consistent,Scout Laptop 2
+8765,1,Blue,14,44,Medium,Inconsistent,3,2,Secondary Scorer,1,Attempt,Slow start,Scout Laptop 2
+8765,2,Red,13,42,Low,Weak offense,2,2,Secondary Scorer,2,Partial,Below average,Scout Laptop 1
+8765,3,Blue,15,45,Medium,Middling,3,3,Primary Scorer,1,Failed,Average,Scout Laptop 2
+8765,4,Red,12,41,Low,Off day,2,1,Secondary Scorer,0,No climb,Poor,Scout Laptop 1
+8765,5,Blue,14,43,Medium,Some improvement,3,2,Secondary Scorer,1,Attempt,Better,Scout Laptop 2
+8765,6,Red,13,40,Low,Weak performance,2,2,Secondary Scorer,1,Failed,Below par,Scout Laptop 1
+8765,7,Blue,15,46,Medium,Getting better,3,3,Primary Scorer,2,Good,Improving,Scout Laptop 2
+8765,8,Red,12,42,Low,Still struggling,2,1,Secondary Scorer,0,Failed,Weak,Scout Laptop 1
+8765,9,Blue,14,44,Medium,Inconsistent,3,2,Secondary Scorer,1,Attempt,Mediocre,Scout Laptop 2
+8765,10,Red,13,43,Medium,Average match,2,2,Secondary Scorer,1,Partial,Unremarkable,Scout Laptop 1

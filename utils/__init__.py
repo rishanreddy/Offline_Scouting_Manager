@@ -24,6 +24,7 @@ from .config import (
     backup_config,
     save_config,
     get_secret_key,
+    generate_field_name,
 )
 from .device_registry import (
     load_registry,
@@ -80,6 +81,7 @@ __all__ = [
     "backup_config",
     "save_config",
     "get_secret_key",
+    "generate_field_name",
     "load_registry",
     "save_registry",
     "update_device",
